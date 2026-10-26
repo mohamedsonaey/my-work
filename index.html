@@ -1,0 +1,2810 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>نظام إدارة الأعمال</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+    <style>
+      :root {
+        --p: #0b746b;
+        --p2: #123d3a;
+        --bg: #f5f7f8;
+        --b: #e5e9ed;
+        --t: #182b2a;
+        --m: #758381;
+        --ok: #16845b;
+        --er: #c34b4b;
+        --surface: #ffffff;
+        --soft: #e8f5f1;
+        --shadow: 0 8px 28px rgba(20, 48, 44, 0.045);
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        font-family: "Segoe UI", Tahoma, Arial, sans-serif;
+        background: var(--bg);
+        color: var(--t);
+        line-height: 1.7;
+        letter-spacing: -0.1px;
+      }
+      #app {
+        display: flex;
+        min-height: 100vh;
+      }
+      nav {
+        width: 258px;
+        background: #fff;
+        border-left: 1px solid var(--b);
+        padding: 22px 14px;
+        flex-shrink: 0;
+        box-shadow: 5px 0 24px rgba(18, 61, 58, 0.025);
+      }
+      nav h1 {
+        color: var(--p2);
+        font-size: 18px;
+        font-weight: 800;
+        margin: 0 7px 4px;
+        padding: 4px 4px 14px;
+        border-bottom: 1px solid #edf0f1;
+      }
+      .nav-subtitle {
+        display: block;
+        color: #8b9997;
+        font-size: 11px;
+        font-weight: 500;
+        margin: 0 11px 22px;
+      }
+      .nav-caption {
+        color: #9aa5a3;
+        font-size: 10px;
+        font-weight: 800;
+        letter-spacing: 0.7px;
+        padding: 12px 12px 6px;
+      }
+      nav a {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 10px 12px;
+        border-radius: 10px;
+        color: #687976;
+        cursor: pointer;
+        margin-bottom: 4px;
+        font-size: 13px;
+        font-weight: 600;
+        transition:
+          background 0.18s ease,
+          color 0.18s ease,
+          transform 0.18s ease;
+      }
+      nav a::before {
+        content: "";
+        width: 6px;
+        height: 6px;
+        flex: 0 0 6px;
+        border-radius: 50%;
+        background: #c6d1cf;
+      }
+      nav a:hover {
+        background: #f3f8f6;
+        color: var(--p);
+        transform: translateX(-2px);
+      }
+      nav a.on {
+        background: var(--soft);
+        color: var(--p);
+        box-shadow: inset -3px 0 var(--p);
+      }
+      nav a.on::before {
+        background: var(--p);
+        box-shadow: 0 0 0 4px #cfe9e2;
+      }
+      .nav-group {
+        margin: 3px 0;
+      }
+      .nav-group summary {
+        list-style: none;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        cursor: pointer;
+        padding: 10px 12px;
+        border-radius: 10px;
+        color: #687976;
+        font-size: 13px;
+        font-weight: 700;
+      }
+      .nav-group summary::-webkit-details-marker {
+        display: none;
+      }
+      .nav-group summary::after {
+        content: "⌄";
+        color: #9aa5a3;
+        font-size: 16px;
+      }
+      .nav-group[open] summary::after {
+        content: "⌃";
+      }
+      .nav-group summary:hover {
+        background: #f6f8f8;
+        color: var(--p);
+      }
+      .nav-group .nav-children {
+        padding: 3px 7px 6px 0;
+      }
+      .nav-group .nav-children a {
+        font-size: 12px;
+        padding: 8px 10px;
+        font-weight: 500;
+      }
+      nav a#out {
+        margin-top: 20px;
+        border-top: 1px solid #edf0f1;
+        border-radius: 0;
+        padding-top: 16px;
+        color: #b64d4d;
+      }
+      nav a:focus-visible,
+      button:focus-visible,
+      input:focus-visible,
+      select:focus-visible,
+      textarea:focus-visible {
+        outline: 2px solid #2aa3a3;
+        outline-offset: 1px;
+      }
+      main {
+        flex: 1;
+        padding: 34px clamp(18px, 3vw, 48px);
+        min-width: 0;
+        max-width: 1800px;
+      }
+      h2 {
+        margin: 0 0 7px;
+        font-size: clamp(22px, 2vw, 28px);
+        font-weight: 800;
+        letter-spacing: -0.6px;
+        color: var(--p2);
+      }
+      .card {
+        background: var(--surface);
+        border: 1px solid var(--b);
+        border-radius: 16px;
+        padding: 20px;
+        box-shadow: var(--shadow);
+      }
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+        gap: 12px;
+        margin: 14px 0;
+      }
+      .stat {
+        background: #fff;
+        border: 1px solid var(--b);
+        border-radius: 16px;
+        padding: 18px 20px;
+        border-right: 3px solid var(--p);
+        box-shadow: var(--shadow);
+      }
+      .stat b {
+        display: block;
+        font-size: clamp(25px, 2.5vw, 32px);
+        font-weight: 800;
+        letter-spacing: -0.6px;
+        color: var(--p);
+      }
+      .stat span {
+        font-size: 13px;
+        color: var(--m);
+      }
+      .tw {
+        overflow-x: auto;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 14px;
+      }
+      th,
+      td {
+        padding: 8px 10px;
+        text-align: right;
+        border-bottom: 1px solid var(--b);
+        white-space: nowrap;
+      }
+      th {
+        background: #f6f8f8;
+        color: #697b78;
+        font-weight: 600;
+      }
+      input,
+      select,
+      textarea,
+      button {
+        font: inherit;
+      }
+      input,
+      select,
+      textarea {
+        width: 100%;
+        padding: 8px 10px;
+        border: 1px solid var(--b);
+        border-radius: 10px;
+        background: #fff;
+        color: var(--t);
+        min-height: 42px;
+      }
+      label {
+        display: block;
+        font-size: 13px;
+        color: var(--m);
+        margin: 10px 0 3px;
+      }
+      .btn {
+        background: var(--p);
+        color: #fff;
+        border: 0;
+        border-radius: 10px;
+        padding: 10px 17px;
+        cursor: pointer;
+        font-weight: 700;
+        transition:
+          transform 0.15s ease,
+          filter 0.15s ease;
+      }
+      .btn:hover {
+        filter: brightness(0.96);
+        transform: translateY(-1px);
+      }
+      .btn.s {
+        background: #e8f5f1;
+        color: var(--p2);
+        padding: 7px 12px;
+        font-size: 12px;
+      }
+      .bar {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        margin: 12px 0;
+        align-items: center;
+      }
+      .bar input,
+      .bar select {
+        width: auto;
+        flex: 1;
+        min-width: 150px;
+      }
+      dialog {
+        border: 0;
+        border-radius: 10px;
+        padding: 18px;
+        width: min(580px, 94vw);
+        max-height: 92vh;
+      }
+      dialog::backdrop {
+        background: #0a3a3e88;
+      }
+      .m {
+        color: var(--m);
+      }
+      .err {
+        color: var(--er);
+      }
+      #toast {
+        position: fixed;
+        bottom: 16px;
+        left: 16px;
+        padding: 10px 16px;
+        border-radius: 6px;
+        color: #fff;
+        display: none;
+        max-width: 85vw;
+        z-index: 9;
+      }
+      .login {
+        max-width: 360px;
+        margin: 12vh auto;
+        padding: 22px;
+      }
+      @media (max-width: 780px) {
+        #app {
+          flex-direction: column;
+        }
+        nav {
+          width: auto;
+          border-left: 0;
+          border-bottom: 1px solid var(--b);
+          padding: 12px;
+          display: block;
+        }
+        nav h1 {
+          font-size: 16px;
+          padding-bottom: 6px;
+          border: 0;
+        }
+        .nav-subtitle {
+          margin-bottom: 10px;
+        }
+        nav > a[data-k] {
+          display: inline-flex;
+          white-space: nowrap;
+          margin: 2px;
+          padding: 8px 10px;
+        }
+        .nav-caption {
+          padding: 5px 8px;
+        }
+        .nav-group {
+          display: inline-block;
+          vertical-align: top;
+          min-width: 140px;
+        }
+        .nav-group summary {
+          padding: 8px 10px;
+        }
+        .nav-group .nav-children {
+          position: relative;
+          background: #fff;
+          border: 1px solid var(--b);
+          border-radius: 10px;
+          padding: 6px;
+          box-shadow: var(--shadow);
+          z-index: 5;
+        }
+        .nav-group .nav-children a {
+          white-space: normal;
+        }
+        nav a#out {
+          display: inline-flex;
+          margin: 4px;
+          padding: 8px 10px;
+          border: 0;
+        }
+        main {
+          padding: 22px 14px 32px;
+        }
+        .card,
+        .stat {
+          border-radius: 13px;
+        }
+        #tbl {
+          padding: 0 4px;
+        }
+        .bar input,
+        .bar select {
+          max-width: none;
+        }
+      }
+
+      /* ===== تحسينات واجهة المستخدم ===== */
+      :root {
+        --p: #0f625f;
+        --p2: #103f40;
+        --bg: #f4f7f7;
+        --b: #e1e9e8;
+        --t: #172f30;
+        --m: #708382;
+        --ok: #16845b;
+        --er: #c23d4b;
+        --surface: #ffffff;
+        --soft: #eaf5f3;
+        --shadow: 0 10px 28px rgba(16, 63, 64, 0.055);
+      }
+      body {
+        background:
+          radial-gradient(ellipse at top right, #e7f3f1 0, transparent 34%),
+          var(--bg);
+        color: var(--t);
+        line-height: 1.7;
+      }
+      #app {
+        min-height: 100vh;
+        gap: 0;
+      }
+      nav {
+        width: 258px;
+        background: linear-gradient(180deg, #103f40 0%, #0b3032 100%);
+        padding: 22px 14px;
+        box-shadow: 8px 0 28px rgba(9, 48, 50, 0.08);
+        position: relative;
+        z-index: 2;
+      }
+      nav h1 {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        color: #fff;
+        font-size: 17px;
+        font-weight: 800;
+        margin: 2px 8px 26px;
+        letter-spacing: -0.3px;
+      }
+      nav h1::before {
+        content: "ب";
+        display: inline-grid;
+        place-items: center;
+        width: 38px;
+        height: 38px;
+        flex: 0 0 38px;
+        border-radius: 13px;
+        background: #d2eee8;
+        color: #103f40;
+        font-size: 21px;
+        font-weight: 900;
+      }
+      nav a {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        min-height: 43px;
+        padding: 10px 12px;
+        border-radius: 11px;
+        color: #c1d9d6;
+        margin: 3px 0;
+        font-size: 13.5px;
+        font-weight: 600;
+        transition:
+          background 0.18s ease,
+          color 0.18s ease,
+          transform 0.18s ease;
+        text-decoration: none;
+      }
+      nav a::before {
+        content: "";
+        width: 7px;
+        height: 7px;
+        flex: 0 0 7px;
+        border-radius: 3px;
+        background: #6e9d99;
+        box-shadow: 0 0 0 4px rgba(110, 157, 153, 0.12);
+      }
+      nav a:hover {
+        background: rgba(255, 255, 255, 0.08);
+        color: #fff;
+        transform: translateX(-2px);
+      }
+      nav a.on {
+        background: linear-gradient(100deg, #176e69, #145b59);
+        color: #fff;
+        box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.07);
+      }
+      nav a.on::before {
+        background: #b9eee2;
+        box-shadow: 0 0 0 4px rgba(185, 238, 226, 0.14);
+      }
+      nav a#out {
+        margin-top: 22px;
+        border-top: 1px solid rgba(255, 255, 255, 0.12);
+        border-radius: 0 0 10px 10px;
+        padding-top: 16px;
+        color: #f0c7c7;
+      }
+      nav a#out::before {
+        background: #dc8989;
+      }
+      main {
+        flex: 1;
+        min-width: 0;
+        padding: 30px clamp(16px, 3vw, 42px);
+        max-width: 1680px;
+        margin: 0 auto;
+      }
+      h2 {
+        color: var(--p2);
+        font-size: clamp(21px, 2vw, 27px);
+        font-weight: 800;
+        letter-spacing: -0.5px;
+        margin: 0;
+      }
+      main > h2 {
+        margin-bottom: 18px;
+      }
+      .bar {
+        gap: 10px;
+        margin: 15px 0;
+      }
+      .bar h2 {
+        margin-inline-end: auto;
+      }
+      .card,
+      .stat {
+        border: 1px solid var(--b);
+        border-radius: 15px;
+        box-shadow: var(--shadow);
+      }
+      .dashboard-total {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 14px;
+        flex-wrap: wrap;
+        background: linear-gradient(120deg, #fff, #f0f8f6);
+      }
+      .dashboard-total b {
+        color: var(--p);
+        font-size: 24px;
+        font-weight: 800;
+      }
+      .dashboard-total span {
+        max-width: 680px;
+        font-size: 13px;
+        line-height: 1.8;
+      }
+      .card {
+        padding: 20px;
+      }
+      .grid {
+        gap: 14px;
+        margin: 18px 0;
+        grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+      }
+      .stat {
+        padding: 18px;
+        position: relative;
+        overflow: hidden;
+        transition:
+          transform 0.18s ease,
+          box-shadow 0.18s ease;
+      }
+      .stat:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 14px 32px rgba(16, 63, 64, 0.09);
+      }
+      .stat::after {
+        content: "";
+        position: absolute;
+        left: -17px;
+        bottom: -25px;
+        width: 76px;
+        height: 76px;
+        border-radius: 50%;
+        background: var(--soft);
+      }
+      .stat b {
+        font-size: clamp(25px, 2.3vw, 32px);
+        line-height: 1.35;
+        font-weight: 800;
+        color: var(--p);
+        position: relative;
+        z-index: 1;
+      }
+      .stat span {
+        display: block;
+        font-size: 13px;
+        color: var(--m);
+        font-weight: 600;
+        position: relative;
+        z-index: 1;
+      }
+      .tw {
+        border-radius: 13px;
+      }
+      table {
+        font-size: 13.5px;
+      }
+      th,
+      td {
+        padding: 12px 13px;
+        border-bottom: 1px solid #edf1f0;
+      }
+      th {
+        background: #f2f7f6;
+        color: #55706e;
+        font-size: 12px;
+        font-weight: 800;
+      }
+      tr:last-child td {
+        border-bottom: 0;
+      }
+      tbody tr:hover,
+      table tr:hover td {
+        background: #fbfdfd;
+      }
+      input,
+      select,
+      textarea {
+        border-color: #d8e4e2;
+        border-radius: 9px;
+        padding: 10px 12px;
+        transition:
+          border-color 0.15s ease,
+          box-shadow 0.15s ease;
+      }
+      input:focus,
+      select:focus,
+      textarea:focus {
+        outline: none;
+        border-color: #4c9d94;
+        box-shadow: 0 0 0 3px rgba(76, 157, 148, 0.13);
+      }
+      label {
+        color: #526b69;
+        font-size: 13px;
+        font-weight: 700;
+        margin: 13px 0 5px;
+      }
+      .btn {
+        border-radius: 9px;
+        padding: 10px 16px;
+        font-weight: 700;
+        background: linear-gradient(135deg, #176e69, #0f5257);
+        box-shadow: 0 4px 10px rgba(15, 82, 87, 0.12);
+        transition:
+          transform 0.15s ease,
+          box-shadow 0.15s ease,
+          opacity 0.15s ease;
+      }
+      .btn:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 7px 15px rgba(15, 82, 87, 0.18);
+      }
+      .btn:active {
+        transform: translateY(0);
+      }
+      .btn.s {
+        background: #eaf3f2;
+        color: #245b59;
+        box-shadow: none;
+        border: 1px solid #dce9e7;
+      }
+      .btn.s:hover {
+        background: #dcecea;
+      }
+      dialog {
+        color: var(--t);
+        box-shadow: 0 24px 80px rgba(5, 34, 35, 0.25);
+        border: 1px solid #dfe9e7;
+        border-radius: 18px;
+        padding: 24px;
+      }
+      dialog h2 {
+        margin-bottom: 12px;
+      }
+      dialog::backdrop {
+        background: rgba(9, 39, 40, 0.52);
+        backdrop-filter: blur(3px);
+      }
+      .m {
+        color: var(--m);
+      }
+      .err {
+        color: var(--er);
+      }
+      #toast {
+        border-radius: 11px;
+        box-shadow: 0 12px 30px rgba(0, 0, 0, 0.16);
+        font-size: 13px;
+        font-weight: 700;
+      }
+      .login {
+        max-width: 410px;
+        margin: 9vh auto;
+        padding: 30px;
+        border-radius: 20px;
+        box-shadow: 0 24px 70px rgba(16, 63, 64, 0.12);
+      }
+      .login h2 {
+        margin-bottom: 20px;
+      }
+      .login .btn {
+        margin-top: 10px;
+        min-height: 44px;
+      }
+      @media (min-width: 781px) {
+        #app {
+          align-items: stretch;
+        }
+        nav {
+          min-height: 100vh;
+          position: sticky;
+          top: 0;
+          height: 100vh;
+          overflow-y: auto;
+        }
+      }
+      @media (max-width: 780px) {
+        #app {
+          flex-direction: column;
+        }
+        nav {
+          width: 100%;
+          display: flex;
+          align-items: center;
+          overflow-x: auto;
+          gap: 5px;
+          padding: 8px 10px;
+          position: sticky;
+          top: 0;
+          box-shadow: 0 6px 20px rgba(9, 48, 50, 0.12);
+        }
+        nav h1 {
+          display: none;
+        }
+        nav a {
+          min-height: 38px;
+          padding: 8px 12px;
+          margin: 0;
+          flex: 0 0 auto;
+          font-size: 12px;
+        }
+        nav a::before {
+          width: 5px;
+          height: 5px;
+          flex-basis: 5px;
+          box-shadow: none;
+        }
+        nav a#out {
+          margin-top: 0;
+          border-top: 0;
+          padding-top: 8px;
+        }
+        main {
+          padding: 20px 14px 30px;
+        }
+        .grid {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+          gap: 10px;
+        }
+        .stat {
+          padding: 13px;
+          border-radius: 12px;
+        }
+        .stat b {
+          font-size: 24px;
+          overflow-wrap: anywhere;
+        }
+        .stat span {
+          font-size: 11.5px;
+        }
+        .card {
+          padding: 14px;
+        }
+        .bar input,
+        .bar select {
+          min-width: 125px;
+        }
+        dialog {
+          padding: 18px;
+        }
+      }
+      @media (max-width: 390px) {
+        .grid {
+          grid-template-columns: 1fr 1fr;
+        }
+        .stat b {
+          font-size: 21px;
+        }
+      }
+
+      /* Dashboard refresh: cleaner hierarchy, fewer visible fields */
+      .dash-head {
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+        gap: 18px;
+        flex-wrap: wrap;
+        margin-bottom: 22px;
+      }
+      .dash-head h2 {
+        font-size: clamp(26px, 3vw, 34px);
+      }
+      .eyebrow {
+        margin: 0 0 5px;
+        color: #41837d;
+        font-size: 11px;
+        font-weight: 900;
+        letter-spacing: 1px;
+      }
+      .dash-head .m,
+      .section-heading .m {
+        margin: 5px 0 0;
+        font-size: 13px;
+      }
+      .update-time {
+        background: #fff;
+        border: 1px solid var(--b);
+        color: var(--m);
+        padding: 8px 12px;
+        border-radius: 999px;
+        font-size: 11px;
+      }
+      .dashboard-stats {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        margin: 0 0 28px;
+      }
+      .dashboard-stats .stat {
+        min-height: 142px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+      }
+      .dashboard-stats .stat b {
+        font-size: clamp(20px, 2vw, 29px);
+        margin: 8px 0 3px;
+        overflow-wrap: anywhere;
+      }
+      .dashboard-stats .stat small {
+        color: var(--m);
+        font-size: 11px;
+        position: relative;
+        z-index: 1;
+      }
+      .dashboard-section {
+        margin-top: 26px;
+      }
+      .section-heading {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 13px;
+      }
+      .section-heading h3 {
+        margin: 0;
+        color: var(--p2);
+        font-size: 17px;
+      }
+      .quick-actions {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 12px;
+      }
+      .quick-action {
+        display: flex;
+        align-items: center;
+        gap: 11px;
+        min-width: 0;
+        padding: 16px;
+        text-align: right;
+        border: 1px solid var(--b);
+        border-radius: 14px;
+        background: #fff;
+        color: var(--t);
+        cursor: pointer;
+        transition:
+          transform 0.16s ease,
+          border-color 0.16s ease,
+          box-shadow 0.16s ease;
+      }
+      .quick-action:hover {
+        transform: translateY(-2px);
+        border-color: #a9cfca;
+        box-shadow: var(--shadow);
+      }
+      .quick-icon {
+        display: grid;
+        place-items: center;
+        width: 39px;
+        height: 39px;
+        flex: 0 0 39px;
+        border-radius: 12px;
+        background: #e8f4f1;
+        color: var(--p);
+        font-size: 21px;
+        font-weight: 800;
+      }
+      .quick-action b,
+      .attention-item b {
+        display: block;
+        font-size: 13px;
+      }
+      .quick-action small,
+      .attention-item small {
+        display: block;
+        margin-top: 2px;
+        color: var(--m);
+        font-size: 11px;
+        font-weight: 400;
+      }
+      .quick-arrow {
+        margin-inline-start: auto;
+        color: #7c9995;
+        font-size: 17px;
+      }
+      .attention-list {
+        overflow: hidden;
+        background: #fff;
+        border: 1px solid var(--b);
+        border-radius: 14px;
+      }
+      .attention-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        width: 100%;
+        padding: 14px 16px;
+        border: 0;
+        border-bottom: 1px solid #edf2f1;
+        background: #fff;
+        color: var(--t);
+        text-align: right;
+        cursor: pointer;
+      }
+      .attention-item:last-child {
+        border-bottom: 0;
+      }
+      .attention-item:hover {
+        background: #f8fbfa;
+      }
+      .attention-item strong {
+        min-width: 30px;
+        padding: 3px 9px;
+        border-radius: 8px;
+        background: #edf5f3;
+        color: var(--p);
+        text-align: center;
+        font-size: 13px;
+      }
+      .attention-dot {
+        width: 8px;
+        height: 8px;
+        flex: 0 0 8px;
+        border-radius: 50%;
+        background: #52a28f;
+      }
+      .attention-dot.warning {
+        background: #e4a044;
+        box-shadow: 0 0 0 4px #fff4df;
+      }
+      .dashboard-note {
+        margin: 18px 2px 0;
+        color: var(--m);
+        font-size: 11px;
+      }
+      .form-title {
+        margin-bottom: 16px;
+        padding-bottom: 14px;
+        border-bottom: 1px solid var(--b);
+      }
+      .form-title h2 {
+        margin-bottom: 4px;
+      }
+      .form-title .m {
+        margin: 5px 0 0;
+        font-size: 12px;
+      }
+      .form-fields {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        column-gap: 14px;
+      }
+      .form-field {
+        min-width: 0;
+      }
+      .extra-fields {
+        margin-top: 16px;
+        border: 1px solid var(--b);
+        border-radius: 12px;
+        background: #f9fbfb;
+      }
+      .extra-fields summary {
+        padding: 12px 14px;
+        cursor: pointer;
+        color: var(--p2);
+        font-size: 13px;
+        font-weight: 800;
+      }
+      .extra-fields summary span {
+        margin-right: 7px;
+        color: var(--m);
+        font-size: 11px;
+        font-weight: 500;
+      }
+      .extra-grid {
+        padding: 0 14px 14px;
+      }
+      .form-actions {
+        position: sticky;
+        bottom: -18px;
+        padding: 12px 0 2px;
+        background: linear-gradient(
+          180deg,
+          rgba(255, 255, 255, 0.86),
+          #fff 25%
+        );
+      }
+      @media (max-width: 1100px) {
+        .dashboard-stats {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+        .quick-actions {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+      }
+      @media (max-width: 520px) {
+        .dashboard-stats {
+          gap: 9px;
+        }
+        .dashboard-stats .stat {
+          min-height: 116px;
+          padding: 12px;
+        }
+        .dashboard-stats .stat b {
+          font-size: 21px;
+        }
+        .quick-actions {
+          grid-template-columns: 1fr;
+        }
+        .quick-action {
+          padding: 12px;
+        }
+        .form-fields {
+          grid-template-columns: 1fr;
+        }
+        .update-time {
+          width: 100%;
+        }
+        .attention-item {
+          padding: 12px;
+          gap: 9px;
+        }
+      }
+
+      /* Minimal redesign: less noise, stronger hierarchy, simpler data entry */
+      :root {
+        --bg: #f6f8f8;
+        --b: #e6eceb;
+        --p: #0d625b;
+        --p2: #123f3d;
+        --m: #71817f;
+        --shadow: 0 5px 22px rgba(18, 63, 61, 0.045);
+      }
+      body {
+        background: #f6f8f8;
+      }
+      nav {
+        width: 238px;
+        padding: 24px 12px;
+        background: #123b39;
+        box-shadow: none;
+      }
+      nav h1 {
+        margin: 2px 10px 30px;
+      }
+      nav a {
+        min-height: 39px;
+        padding: 9px 11px;
+        border-radius: 9px;
+        font-size: 13px;
+        font-weight: 500;
+      }
+      nav a::before {
+        width: 5px;
+        height: 5px;
+        flex-basis: 5px;
+        box-shadow: none;
+      }
+      nav a.on {
+        background: #1b5d57;
+        box-shadow: inset 3px 0 #a6ddd0;
+      }
+      main {
+        padding: 34px clamp(18px, 3vw, 48px);
+        max-width: 1760px;
+      }
+      h2 {
+        letter-spacing: -0.25px;
+      }
+      .card,
+      .stat {
+        box-shadow: none;
+        border-radius: 13px;
+      }
+      .stat {
+        border-right-width: 3px;
+      }
+      .stat::after {
+        opacity: 0.65;
+      }
+      .grid {
+        gap: 12px;
+      }
+      .bar {
+        margin: 18px 0 14px;
+      }
+      .bar input,
+      .bar select {
+        max-width: 340px;
+      }
+      #tbl {
+        padding: 4px 16px;
+      }
+      table {
+        min-width: 620px;
+      }
+      th,
+      td {
+        padding: 13px 12px;
+      }
+      th {
+        background: #f7f9f9;
+      }
+      tbody tr:hover td,
+      table tr:hover td {
+        background: #f8fbfa;
+      }
+      .btn {
+        box-shadow: none;
+      }
+      .btn:hover {
+        box-shadow: none;
+      }
+      .btn.s {
+        font-weight: 600;
+      }
+      dialog {
+        width: min(620px, 94vw);
+        border-radius: 16px;
+      }
+      .form-title {
+        margin-bottom: 12px;
+      }
+      .form-fields {
+        gap: 2px 16px;
+      }
+      .extra-fields {
+        margin-top: 18px;
+        background: #f8faf9;
+        border-color: #e6eceb;
+      }
+      .extra-fields summary {
+        list-style: none;
+        display: flex;
+        justify-content: space-between;
+        gap: 10px;
+        align-items: center;
+      }
+      .extra-fields summary::-webkit-details-marker {
+        display: none;
+      }
+      .extra-fields summary::after {
+        content: "⌄";
+        font-size: 18px;
+        color: var(--p);
+      }
+      .extra-fields[open] summary::after {
+        content: "⌃";
+      }
+      .form-actions {
+        margin-bottom: 0;
+      }
+      @media (max-width: 780px) {
+        nav {
+          padding: 8px;
+        }
+        nav a {
+          border-radius: 8px;
+        }
+        main {
+          padding: 22px 14px 32px;
+        }
+        #tbl {
+          padding: 0 10px;
+        }
+        .bar input,
+        .bar select {
+          max-width: none;
+        }
+      }
+
+      /* Final visual refresh: modern, airy workspace */
+      nav {
+        background: #fff !important;
+      }
+      .card,
+      .stat {
+        border-radius: 16px;
+      }
+      .stat span {
+        display: block;
+        margin-top: 4px;
+      }
+      .tw {
+        border-radius: 12px;
+      }
+      table {
+        font-size: 13px;
+      }
+      th,
+      td {
+        padding: 12px 14px;
+      }
+      tbody tr:hover td {
+        background: #f7fbf9;
+      }
+      dialog {
+        border-radius: 18px;
+        box-shadow: 0 24px 80px #123d3a25;
+      }
+      dialog::backdrop {
+        background: #102f2c77;
+        backdrop-filter: blur(3px);
+      }
+      .extra-fields {
+        border-radius: 12px;
+        padding: 14px;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="app"></div>
+    <div id="toast"></div>
+    <script>
+      // ====== الصق هنا بيانات مشروعك من Supabase: Project Settings > API ======
+      const SUPABASE_URL = "https://oposxfzaiwywgazpamuz.supabase.co";
+      const SUPABASE_ANON_KEY =
+        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9wb3N4ZnphaXd5d2dhenBhbXV6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTI5NjA1MTUsImV4cCI6MjEwODUzNjUxNX0.hffPXAh91s6i5E-h9wGPLSfCz14KfLu2DdF-4p7Xh2A"; // anon فقط، وليس service_role أبدًا
+      // ========================================================================
+      const db = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+      const $ = (s) => document.querySelector(s);
+      const esc = (v) =>
+        String(v ?? "").replace(
+          /[&<>"']/g,
+          (c) =>
+            ({
+              "&": "&amp;",
+              "<": "&lt;",
+              ">": "&gt;",
+              '"': "&quot;",
+              "'": "&#39;",
+            })[c],
+        );
+      const toast = (m, ok) => {
+        const t = $("#toast");
+        t.textContent = m;
+        t.style.background = ok ? "var(--ok)" : "var(--er)";
+        t.style.display = "block";
+        setTimeout(() => (t.style.display = "none"), 5000);
+      };
+      const today = new Date(
+        Date.now() - new Date().getTimezoneOffset() * 60000,
+      )
+        .toISOString()
+        .slice(0, 10);
+      const lab = (a, v) => (a.find((x) => x[0] === v) || [0, v ?? ""])[1];
+      const yn = (a, b) => (v) => (v ? a : b);
+      let L = {},
+        ROWS = [],
+        CD = {};
+      const nm = (t, id) => (L[t] || []).find((x) => x.id === id)?.name || "—";
+      const opts = (t, f) => () =>
+        (L[t] || []).filter(f || (() => true)).map((x) => [x.id, x.name]);
+
+      const ACC = [
+        ["independent", "مسوق مستقل"],
+        ["leader", "ليدر"],
+        ["team_member", "مسوق تابع لليدر"],
+      ];
+      const ACT = [
+        ["active", "نشط"],
+        ["inactive", "غير نشط"],
+      ];
+      const STG = [
+        ["new", "عميل جديد"],
+        ["contacted", "تم التواصل"],
+        ["interested", "مهتم"],
+        ["quote_sent", "تم إرسال عرض سعر"],
+        ["agreed", "تم الاتفاق"],
+        ["awaiting_deposit", "في انتظار دفعة مقدمة"],
+        ["converted", "تحول إلى مشروع"],
+        ["not_interested", "غير مهتم"],
+        ["lost", "مفقود / ملغى"],
+      ];
+      const PST = [
+        ["agreed_not_started", "متفق عليه ولم يبدأ"],
+        ["in_progress", "قيد التنفيذ"],
+        ["waiting_client_info", "في انتظار معلومات"],
+        ["waiting_client_review", "في انتظار مراجعة العميل"],
+        ["needs_revisions", "يحتاج تعديلات"],
+        ["paused", "متوقف مؤقتًا"],
+        ["delivered", "تم التسليم"],
+        ["cancelled", "ملغى"],
+      ];
+
+      const R = {
+        clients: {
+          t: "العملاء",
+          tb: "clients",
+          ord: "created_at",
+          filt: ["stage", STG],
+          cols: [
+            ["name", "اسم العميل"],
+            ["business_name", "النشاط"],
+            ["stage", "المرحلة", (v) => lab(STG, v)],
+            ["next_followup_at", "موعد المتابعة"],
+          ],
+          f: [
+            { k: "name", l: "اسم العميل", req: 1 },
+            { k: "phone", l: "الهاتف", ty: "tel" },
+            { k: "business_name", l: "اسم النشاط" },
+            { k: "business_type", l: "نوع النشاط" },
+            { k: "city", l: "المدينة" },
+            { k: "current_website", l: "رابط الموقع الحالي", ty: "url" },
+            { k: "needs_description", l: "وصف الاحتياجات", ty: "textarea" },
+            {
+              k: "referred_by",
+              l: "المسوق الذي جلبه",
+              ty: "select",
+              o: opts("marketers"),
+            },
+            {
+              k: "stage",
+              l: "المرحلة",
+              ty: "select",
+              o: () => STG,
+              def: "new",
+              req: 1,
+            },
+            { k: "last_contact_at", l: "آخر تواصل", ty: "date" },
+            { k: "next_followup_at", l: "موعد المتابعة القادمة", ty: "date" },
+            { k: "notes", l: "ملاحظات", ty: "textarea" },
+          ],
+        },
+        projects: {
+          t: "المشاريع",
+          tb: "projects",
+          ord: "project_no",
+          filt: ["execution_status", PST],
+          act: 1,
+          cols: [
+            ["project_no", "رقم"],
+            ["name", "اسم المشروع"],
+            ["client_id", "العميل", (v) => nm("clients", v)],
+            ["agreed_price", "قيمة الاتفاق"],
+            ["execution_status", "الحالة", (v) => lab(PST, v)],
+          ],
+          f: [
+            { k: "name", l: "اسم المشروع", req: 1 },
+            {
+              k: "client_id",
+              l: "العميل",
+              ty: "select",
+              o: opts("clients"),
+              req: 1,
+            },
+            {
+              k: "service_type_id",
+              l: "نوع الخدمة",
+              ty: "select",
+              o: opts("service_types"),
+              req: 1,
+            },
+            {
+              k: "marketer_id",
+              l: "المسوق الذي جلبه",
+              ty: "select",
+              o: opts("marketers"),
+            },
+            { k: "agreed_price", l: "السعر المتفق عليه", ty: "number", req: 1 },
+            {
+              k: "agreed_date",
+              l: "تاريخ الاتفاق المؤكد",
+              ty: "date",
+              def: today,
+              req: 1,
+            },
+            { k: "start_date", l: "تاريخ بدء التنفيذ", ty: "date" },
+            { k: "due_date", l: "موعد التسليم المتفق عليه", ty: "date" },
+            {
+              k: "execution_status",
+              l: "حالة التنفيذ",
+              ty: "select",
+              o: () => PST,
+              def: "agreed_not_started",
+              req: 1,
+            },
+            {
+              k: "delivered_date",
+              l: "تاريخ التسليم الفعلي (مطلوب عند التسليم)",
+              ty: "date",
+            },
+            {
+              k: "cancelled_at",
+              l: "تاريخ الإلغاء (مطلوب عند الإلغاء)",
+              ty: "date",
+            },
+            { k: "cancel_reason", l: "سبب الإلغاء" },
+            { k: "project_url", l: "رابط المشروع / الملفات", ty: "url" },
+            { k: "requirements", l: "وصف المتطلبات", ty: "textarea" },
+            { k: "notes", l: "ملاحظات", ty: "textarea" },
+          ],
+        },
+        marketers: {
+          t: "المسوقون والليدرز",
+          tb: "marketers",
+          ord: "created_at",
+          filt: ["status", ACT],
+          cols: [
+            ["name", "الاسم"],
+            ["account_type", "نوع الحساب", (v) => lab(ACC, v)],
+            ["leader_id", "الليدر", (v) => (v ? nm("marketers", v) : "—")],
+            ["status", "الحالة", (v) => lab(ACT, v)],
+          ],
+          f: [
+            { k: "name", l: "الاسم", req: 1 },
+            { k: "phone", l: "الهاتف", ty: "tel" },
+            {
+              k: "account_type",
+              l: "نوع الحساب",
+              ty: "select",
+              o: () => ACC,
+              def: "independent",
+              req: 1,
+            },
+            {
+              k: "leader_id",
+              l: "الليدر المسؤول (للتابعين فقط)",
+              ty: "select",
+              o: opts("marketers", (x) => x.account_type === "leader"),
+            },
+            { k: "team_id", l: "الفريق", ty: "select", o: opts("teams") },
+            {
+              k: "status",
+              l: "الحالة",
+              ty: "select",
+              o: () => ACT,
+              def: "active",
+              req: 1,
+            },
+            { k: "registered_at", l: "تاريخ التسجيل", ty: "date", def: today },
+            {
+              k: "payout_method",
+              l: "وسيلة استلام الأموال (InstaPay / محفظة / بنكي ...)",
+            },
+            { k: "payout_details", l: "بيانات وسيلة التحويل" },
+            {
+              k: "commission_rate",
+              l: "نسبة عمولة خاصة % (فارغ = النسبة العامة)",
+              ty: "number",
+            },
+            {
+              k: "bonus_eligible",
+              l: "مؤهل للمكافأة الفردية",
+              ty: "bool",
+              def: false,
+            },
+            { k: "bonus_rate", l: "نسبة المكافأة %", ty: "number" },
+            { k: "bonus_start", l: "بداية فترة المكافأة", ty: "date" },
+            { k: "bonus_end", l: "نهاية فترة المكافأة", ty: "date" },
+            { k: "admin_notes", l: "ملاحظات إدارية", ty: "textarea" },
+          ],
+        },
+        teams: {
+          t: "الفرق",
+          tb: "teams",
+          ord: "name",
+          asc: 1,
+          cols: [
+            ["name", "اسم الفريق"],
+            ["notes", "ملاحظات"],
+            ["is_active", "الحالة", yn("نشط", "متوقف")],
+          ],
+          f: [
+            { k: "name", l: "اسم الفريق", req: 1 },
+            { k: "notes", l: "ملاحظات", ty: "textarea" },
+            { k: "is_active", l: "نشط", ty: "bool", def: true },
+          ],
+        },
+        service_types: {
+          t: "أنواع الخدمات",
+          tb: "service_types",
+          ord: "name",
+          asc: 1,
+          cols: [
+            ["name", "الخدمة"],
+            [
+              "category_id",
+              "التصنيف",
+              (v) => (v ? nm("service_categories", v) : ""),
+            ],
+            ["is_recurring", "النوع", yn("متكررة", "مرة واحدة")],
+            ["default_price", "السعر الافتراضي"],
+            ["is_active", "الحالة", yn("نشطة", "متوقفة")],
+          ],
+          f: [
+            { k: "name", l: "اسم الخدمة", req: 1 },
+            { k: "description", l: "الوصف", ty: "textarea" },
+            {
+              k: "category_id",
+              l: "التصنيف",
+              ty: "select",
+              o: opts("service_categories"),
+            },
+            { k: "is_recurring", l: "خدمة متكررة؟", ty: "bool", def: false },
+            {
+              k: "default_price",
+              l: "السعر الافتراضي (اختياري)",
+              ty: "number",
+            },
+            { k: "is_active", l: "نشطة", ty: "bool", def: true },
+            {
+              k: "custom_fields",
+              l: "حقول إضافية للمشروع (اسم كل حقل في سطر)",
+              ty: "lines",
+            },
+          ],
+        },
+        service_categories: {
+          t: "تصنيفات الخدمات",
+          tb: "service_categories",
+          ord: "name",
+          asc: 1,
+          cols: [["name", "التصنيف"]],
+          f: [{ k: "name", l: "اسم التصنيف", req: 1 }],
+        },
+        client_payments: {
+          t: "تحصيلات العملاء",
+          tb: "client_payments",
+          ord: "paid_at",
+          cols: [
+            ["project_id", "المشروع", (v) => nm("projects", v)],
+            ["amount", "المبلغ"],
+            ["paid_at", "تاريخ الدفع"],
+            ["method", "طريقة الدفع"],
+            ["reference", "المرجع"],
+            ["notes", "ملاحظات"],
+          ],
+          f: [
+            {
+              k: "project_id",
+              l: "المشروع",
+              ty: "select",
+              o: opts("projects"),
+              req: 1,
+            },
+            { k: "amount", l: "المبلغ المحصّل", ty: "number", req: 1 },
+            {
+              k: "paid_at",
+              l: "تاريخ التحصيل",
+              ty: "date",
+              def: today,
+              req: 1,
+            },
+            { k: "method", l: "طريقة الدفع" },
+            { k: "reference", l: "رقم المرجع" },
+            { k: "notes", l: "ملاحظات", ty: "textarea" },
+          ],
+        },
+        payouts: {
+          t: "مدفوعات المسوقين والمستحقات المدفوعة",
+          tb: "payouts",
+          ord: "paid_at",
+          cols: [
+            ["recipient_id", "المستلم", (v) => nm("marketers", v)],
+            [
+              "kind",
+              "نوع المستحق",
+              (v) =>
+                ({
+                  commission: "عمولة",
+                  bonus: "مكافأة",
+                  challenge_reward: "جائزة تحدي",
+                  other: "أخرى",
+                })[v] || v,
+            ],
+            ["amount", "المبلغ المدفوع"],
+            ["paid_at", "تاريخ الدفع"],
+            ["method", "طريقة الدفع"],
+            ["reference", "المرجع"],
+            ["notes", "ملاحظات"],
+          ],
+          f: [
+            {
+              k: "recipient_id",
+              l: "المستلم",
+              ty: "select",
+              o: opts("marketers"),
+              req: 1,
+            },
+            {
+              k: "kind",
+              l: "نوع المستحق",
+              ty: "select",
+              o: () => [
+                ["commission", "عمولة"],
+                ["bonus", "مكافأة"],
+                ["challenge_reward", "جائزة تحدي"],
+                ["other", "أخرى"],
+              ],
+              def: "commission",
+              req: 1,
+            },
+            { k: "amount", l: "المبلغ المدفوع", ty: "number", req: 1 },
+            { k: "paid_at", l: "تاريخ الدفع", ty: "date", def: today, req: 1 },
+            { k: "method", l: "طريقة الدفع" },
+            { k: "reference", l: "رقم المرجع" },
+            { k: "notes", l: "ملاحظات", ty: "textarea" },
+          ],
+        },
+        client_interactions: {
+          t: "سجل التواصل مع العملاء",
+          tb: "client_interactions",
+          ord: "occurred_at",
+          cols: [
+            ["client_id", "العميل", (v) => nm("clients", v)],
+            [
+              "occurred_at",
+              "تاريخ التواصل",
+              (v) => new Date(v).toLocaleString("ar-EG"),
+            ],
+            ["channel", "وسيلة التواصل"],
+            ["summary", "ملخص التواصل"],
+          ],
+          f: [
+            {
+              k: "client_id",
+              l: "العميل",
+              ty: "select",
+              o: opts("clients"),
+              req: 1,
+            },
+            {
+              k: "occurred_at",
+              l: "تاريخ ووقت التواصل",
+              ty: "datetime-local",
+              def: new Date(Date.now() - new Date().getTimezoneOffset() * 60000)
+                .toISOString()
+                .slice(0, 16),
+              req: 1,
+            },
+            { k: "channel", l: "وسيلة التواصل" },
+            { k: "summary", l: "ملخص التواصل", ty: "textarea", req: 1 },
+          ],
+        },
+        project_costs: {
+          t: "تكاليف تنفيذ المشاريع",
+          tb: "project_costs",
+          ord: "spent_at",
+          cols: [
+            ["project_id", "المشروع", (v) => nm("projects", v)],
+            ["category", "بند التكلفة"],
+            ["amount", "المبلغ"],
+            ["spent_at", "التاريخ"],
+            ["vendor", "المورد/المستفيد"],
+            ["method", "طريقة الدفع"],
+            ["notes", "ملاحظات"],
+          ],
+          f: [
+            {
+              k: "project_id",
+              l: "المشروع",
+              ty: "select",
+              o: opts("projects"),
+              req: 1,
+            },
+            { k: "category", l: "بند التكلفة", req: 1 },
+            { k: "amount", l: "المبلغ", ty: "number", req: 1 },
+            {
+              k: "spent_at",
+              l: "تاريخ التكلفة",
+              ty: "date",
+              def: today,
+              req: 1,
+            },
+            { k: "vendor", l: "المورد/المستفيد" },
+            { k: "method", l: "طريقة الدفع" },
+            { k: "reference", l: "المرجع" },
+            { k: "notes", l: "ملاحظات", ty: "textarea" },
+          ],
+        },
+        business_expenses: {
+          t: "المصروفات",
+          tb: "business_expenses",
+          ord: "spent_at",
+          cols: [
+            ["category", "البند"],
+            ["amount", "المبلغ"],
+            ["spent_at", "التاريخ"],
+            ["method", "طريقة الدفع"],
+            ["reference", "المرجع"],
+            ["notes", "ملاحظات"],
+          ],
+          f: [
+            { k: "category", l: "بند المصروف", req: 1 },
+            { k: "amount", l: "المبلغ", ty: "number", req: 1 },
+            {
+              k: "spent_at",
+              l: "تاريخ المصروف",
+              ty: "date",
+              def: today,
+              req: 1,
+            },
+            { k: "method", l: "طريقة الدفع" },
+            { k: "reference", l: "المرجع" },
+            { k: "notes", l: "ملاحظات", ty: "textarea" },
+          ],
+        },
+        service_subscriptions: {
+          t: "الاشتراكات والخدمات المتكررة",
+          tb: "service_subscriptions",
+          ord: "next_due_date",
+          filt: [
+            "status",
+            [
+              ["active", "نشط"],
+              ["paused", "متوقف مؤقتًا"],
+              ["cancelled", "ملغى"],
+              ["ended", "منتهي"],
+            ],
+          ],
+          cols: [
+            ["name", "الاشتراك"],
+            ["client_id", "العميل", (v) => nm("clients", v)],
+            ["service_type_id", "الخدمة", (v) => nm("service_types", v)],
+            ["amount", "قيمة الدفعة"],
+            ["billing_cycle", "دورية الدفع"],
+            ["next_due_date", "الاستحقاق القادم"],
+            ["status", "الحالة"],
+          ],
+          f: [
+            { k: "name", l: "اسم الاشتراك", req: 1 },
+            {
+              k: "client_id",
+              l: "العميل",
+              ty: "select",
+              o: opts("clients"),
+              req: 1,
+            },
+            {
+              k: "service_type_id",
+              l: "الخدمة",
+              ty: "select",
+              o: opts("service_types"),
+            },
+            { k: "amount", l: "قيمة كل دفعة", ty: "number", req: 1 },
+            {
+              k: "billing_cycle",
+              l: "دورية الدفع",
+              ty: "select",
+              o: () => [
+                ["monthly", "شهري"],
+                ["quarterly", "كل 3 شهور"],
+                ["semiannual", "كل 6 شهور"],
+                ["yearly", "سنوي"],
+                ["custom", "مخصص"],
+              ],
+              def: "monthly",
+              req: 1,
+            },
+            {
+              k: "start_date",
+              l: "تاريخ البداية",
+              ty: "date",
+              def: today,
+              req: 1,
+            },
+            { k: "end_date", l: "تاريخ النهاية", ty: "date" },
+            { k: "next_due_date", l: "موعد الاستحقاق القادم", ty: "date" },
+            {
+              k: "status",
+              l: "الحالة",
+              ty: "select",
+              o: () => [
+                ["active", "نشط"],
+                ["paused", "متوقف مؤقتًا"],
+                ["cancelled", "ملغى"],
+                ["ended", "منتهي"],
+              ],
+              def: "active",
+              req: 1,
+            },
+            { k: "notes", l: "ملاحظات", ty: "textarea" },
+          ],
+        },
+        individual_rewards: {
+          t: "المكافآت الفردية",
+          tb: "individual_rewards",
+          ord: "start_date",
+          cols: [
+            ["name", "اسم المكافأة"],
+            ["marketer_id", "المسوق", (v) => nm("marketers", v)],
+            ["start_date", "من"],
+            ["end_date", "إلى"],
+            [
+              "basis",
+              "أساس الحساب",
+              (v) =>
+                ({
+                  percentage: "نسبة من التحصيل",
+                  fixed_per_project: "مبلغ لكل مشروع",
+                  fixed_total: "مبلغ ثابت",
+                })[v] || v,
+            ],
+            ["amount", "القيمة"],
+            ["status", "الحالة"],
+          ],
+          f: [
+            { k: "name", l: "اسم المكافأة", req: 1 },
+            {
+              k: "marketer_id",
+              l: "المسوق",
+              ty: "select",
+              o: opts("marketers"),
+              req: 1,
+            },
+            { k: "start_date", l: "بداية الفترة", ty: "date", req: 1 },
+            { k: "end_date", l: "نهاية الفترة", ty: "date", req: 1 },
+            {
+              k: "basis",
+              l: "أساس الحساب",
+              ty: "select",
+              o: () => [
+                ["percentage", "نسبة من التحصيل"],
+                ["fixed_per_project", "مبلغ لكل مشروع مؤهل"],
+                ["fixed_total", "مبلغ ثابت"],
+              ],
+              def: "percentage",
+              req: 1,
+            },
+            { k: "amount", l: "النسبة % أو المبلغ", ty: "number", req: 1 },
+            {
+              k: "status",
+              l: "الحالة",
+              ty: "select",
+              o: () => [
+                ["active", "نشطة"],
+                ["paused", "موقوفة"],
+                ["completed", "مكتملة"],
+              ],
+              def: "active",
+              req: 1,
+            },
+            { k: "notes", l: "شروط وملاحظات", ty: "textarea" },
+          ],
+        },
+        sales_challenges: {
+          t: "التحديات والمسابقات",
+          tb: "sales_challenges",
+          ord: "start_date",
+          cols: [
+            ["name", "اسم التحدي"],
+            ["start_date", "من"],
+            ["end_date", "إلى"],
+            [
+              "metric",
+              "معيار الفوز",
+              (v) =>
+                ({
+                  projects_count: "عدد المشاريع",
+                  agreed_value: "قيمة الاتفاقات",
+                  collected_value: "قيمة التحصيل",
+                })[v] || v,
+            ],
+            [
+              "prize_type",
+              "نوع الجائزة",
+              (v) => ({ fixed: "مبلغ ثابت", percentage: "نسبة" })[v] || v,
+            ],
+            ["prize_amount", "قيمة الجائزة"],
+            ["status", "الحالة"],
+          ],
+          f: [
+            { k: "name", l: "اسم التحدي", req: 1 },
+            { k: "start_date", l: "بداية التحدي", ty: "date", req: 1 },
+            { k: "end_date", l: "نهاية التحدي", ty: "date", req: 1 },
+            {
+              k: "metric",
+              l: "معيار الفوز",
+              ty: "select",
+              o: () => [
+                ["projects_count", "عدد المشاريع المتفق عليها"],
+                ["agreed_value", "قيمة الاتفاقات"],
+                ["collected_value", "قيمة التحصيل"],
+              ],
+              def: "projects_count",
+              req: 1,
+            },
+            {
+              k: "eligible_account_type",
+              l: "الفئة المؤهلة",
+              ty: "select",
+              o: () => [
+                ["all", "كل المسوقين"],
+                ["independent", "مستقلون"],
+                ["team_member", "أعضاء الفرق"],
+                ["leader", "ليدرز"],
+              ],
+              def: "all",
+              req: 1,
+            },
+            {
+              k: "prize_type",
+              l: "نوع الجائزة",
+              ty: "select",
+              o: () => [
+                ["fixed", "مبلغ ثابت"],
+                ["percentage", "نسبة"],
+              ],
+              def: "fixed",
+              req: 1,
+            },
+            { k: "prize_amount", l: "قيمة الجائزة", ty: "number", req: 1 },
+            {
+              k: "status",
+              l: "الحالة",
+              ty: "select",
+              o: () => [
+                ["draft", "مسودة"],
+                ["active", "نشط"],
+                ["closed", "منتهي"],
+                ["approved", "تم اعتماد الفائز"],
+              ],
+              def: "draft",
+              req: 1,
+            },
+            { k: "notes", l: "الشروط والملاحظات", ty: "textarea" },
+          ],
+        },
+        challenge_awards: {
+          t: "الفائزون وجوائز التحديات",
+          tb: "challenge_awards",
+          ord: "created_at",
+          cols: [
+            ["challenge_id", "التحدي", (v) => nm("sales_challenges", v)],
+            ["marketer_id", "الفائز", (v) => nm("marketers", v)],
+            ["amount", "الجائزة"],
+            ["approved", "معتمدة", yn("نعم", "لا")],
+            ["notes", "ملاحظات"],
+          ],
+          f: [
+            {
+              k: "challenge_id",
+              l: "التحدي",
+              ty: "select",
+              o: opts("sales_challenges"),
+              req: 1,
+            },
+            {
+              k: "marketer_id",
+              l: "الفائز",
+              ty: "select",
+              o: opts("marketers"),
+              req: 1,
+            },
+            { k: "amount", l: "قيمة الجائزة", ty: "number", req: 1 },
+            { k: "approved", l: "اعتماد الجائزة", ty: "bool", def: false },
+            { k: "notes", l: "ملاحظات", ty: "textarea" },
+          ],
+        },
+        audit: {
+          t: "سجل العمليات",
+          tb: "audit_log",
+          ord: "occurred_at",
+          lim: 200,
+          ro: 1,
+          cols: [
+            [
+              "occurred_at",
+              "الوقت",
+              (v) => new Date(v).toLocaleString("ar-EG"),
+            ],
+            ["table_name", "الجدول"],
+            [
+              "action",
+              "العملية",
+              (v) => ({ INSERT: "إضافة", UPDATE: "تعديل", DELETE: "حذف" })[v],
+            ],
+            ["reason", "السبب"],
+            [
+              "new_data",
+              "البيانات الجديدة",
+              (v) => (v ? JSON.stringify(v).slice(0, 70) + "…" : ""),
+            ],
+          ],
+        },
+      };
+      const NAV_GROUPS = [
+        {
+          title: "الرئيسية",
+          items: [
+            ["dash", "لوحة التحكم"],
+            ["clients", "العملاء"],
+            ["followups", "المتابعات"],
+            ["projects", "المشاريع"],
+            ["marketers", "المسوقون"],
+          ],
+        },
+        {
+          title: "الإدارة المالية",
+          items: [
+            ["commissions", "العمولات والمستحقات"],
+            ["collection_summary", "التحصيل والمتبقي"],
+            ["client_payments", "تحصيلات العملاء"],
+            ["payouts", "مدفوعات المسوقين"],
+            ["business_expenses", "المصروفات"],
+            ["project_costs", "تكاليف المشاريع"],
+          ],
+        },
+        {
+          title: "إدارة المسوقين",
+          items: [
+            ["teams", "الفرق"],
+            ["individual_rewards", "المكافآت الفردية"],
+            ["sales_challenges", "التحديات والمسابقات"],
+            ["challenge_leaderboard", "ترتيب التحديات"],
+            ["challenge_awards", "جوائز التحديات"],
+          ],
+        },
+        {
+          title: "الخدمات والمتابعة",
+          items: [
+            ["service_subscriptions", "الاشتراكات المتكررة"],
+            ["service_types", "أنواع الخدمات"],
+            ["service_categories", "تصنيفات الخدمات"],
+            ["client_interactions", "سجل التواصل"],
+          ],
+        },
+        {
+          title: "إعدادات النظام",
+          items: [
+            ["settings", "إعدادات العمولات"],
+            ["audit", "سجل العمليات"],
+          ],
+        },
+      ];
+      const NAV = NAV_GROUPS.flatMap((group) => group.items);
+
+      async function loadL() {
+        for (const t of [
+          "service_categories",
+          "service_types",
+          "teams",
+          "marketers",
+          "clients",
+          "projects",
+          "sales_challenges",
+        ]) {
+          const { data } = await db.from(t).select("*").order("name");
+          L[t] = data || [];
+        }
+      }
+
+      // ---------- الدخول ----------
+      function login(msg) {
+        $("#app").innerHTML = `<div class="card login"><h2>تسجيل الدخول</h2>
+  <label>البريد الإلكتروني</label><input id="em" type="email" dir="ltr" autocomplete="username" required>
+<label>كلمة المرور</label><input id="pw" type="password" dir="ltr" autocomplete="current-password" required>
+<label style="display:flex;gap:6px;align-items:center"><input type="checkbox" style="width:auto" onchange="document.getElementById('pw').type=this.checked?'text':'password'"> إظهار كلمة المرور</label>
+  <p class="err" id="lm">${esc(msg || "")}</p><button class="btn" id="lg" style="width:100%">دخول</button></div>`;
+        let busy = false;
+        const go_ = async () => {
+          if (busy) return;
+          const email = $("#em").value.trim();
+          const password = $("#pw").value;
+          if (!email || !password) {
+            $("#lm").textContent = "اكتب البريد الإلكتروني وكلمة المرور الأول.";
+            return;
+          }
+          busy = true;
+          const btn = $("#lg");
+          btn.disabled = true;
+          btn.textContent = "جاري التحقق…";
+          $("#lm").textContent = "";
+          try {
+            const { error } = await db.auth.signInWithPassword({
+              email,
+              password,
+            });
+            if (error) {
+              const msg = String(error.message || "");
+              if (/invalid login credentials/i.test(msg))
+                $("#lm").textContent =
+                  "الإيميل أو كلمة المرور غير صحيحة. راجع بيانات الحساب أو أعد تعيين كلمة المرور.";
+              else if (/email not confirmed/i.test(msg))
+                $("#lm").textContent =
+                  "لازم تأكد البريد الإلكتروني من رسالة Supabase الأول.";
+              else if (/fetch|network|failed to fetch/i.test(msg))
+                $("#lm").textContent =
+                  "تعذر الاتصال بـ Supabase. راجع الإنترنت وإعدادات المشروع.";
+              else $("#lm").textContent = "تعذر تسجيل الدخول: " + msg;
+              return;
+            }
+            await boot();
+          } catch (e) {
+            $("#lm").textContent =
+              "حصل خطأ أثناء تسجيل الدخول: " + (e?.message || "خطأ غير معروف");
+          } finally {
+            busy = false;
+            if ($("#lg")) {
+              $("#lg").disabled = false;
+              $("#lg").textContent = "دخول";
+            }
+          }
+        };
+        $("#lg").onclick = go_;
+        $("#pw").onkeydown = (e) => {
+          if (e.key === "Enter") go_();
+        };
+      }
+      async function boot() {
+        if (SUPABASE_URL.startsWith("PASTE"))
+          return ($("#app").innerHTML =
+            '<p class="card err">عدّل SUPABASE_URL و SUPABASE_ANON_KEY في أعلى الملف أولًا.</p>');
+        const {
+          data: { session },
+        } = await db.auth.getSession();
+        if (!session) return login();
+        const { data: a, error: adminError } = await db
+          .from("admins")
+          .select("user_id")
+          .eq("user_id", session.user.id);
+        if (adminError)
+          return login(
+            "تم تسجيل الدخول لكن تعذر التحقق من صلاحية الأدمن: " +
+              adminError.message,
+          );
+        if (!a?.length) {
+          await db.auth.signOut();
+          return login("هذا الحساب غير مصرح له بالدخول.");
+        }
+        await loadL();
+        $("#app").innerHTML =
+          `<nav><h1>مساحة العمل</h1><span class="nav-subtitle">إدارة أعمالك من مكان واحد</span>${NAV_GROUPS.map((group, i) => (i === 0 ? `<div class="nav-caption">${group.title}</div>${group.items.map(([k, l]) => `<a data-k="${k}" tabindex="0">${l}</a>`).join("")}` : `<details class="nav-group"><summary>${group.title}</summary><div class="nav-children">${group.items.map(([k, l]) => `<a data-k="${k}" tabindex="0">${l}</a>`).join("")}</div></details>`)).join("")}<a id="out" tabindex="0">تسجيل الخروج</a></nav><main></main><dialog id="dlg"></dialog>`;
+        document
+          .querySelectorAll("nav a[data-k]")
+          .forEach((a) => (a.onclick = () => go(a.dataset.k)));
+        $("#out").onclick = async () => {
+          await db.auth.signOut();
+          boot();
+        };
+        go("dash");
+      }
+      function go(k) {
+        document
+          .querySelectorAll("nav a[data-k]")
+          .forEach((a) => a.classList.toggle("on", a.dataset.k === k));
+        k === "dash"
+          ? dash()
+          : k === "settings"
+            ? settings()
+            : k === "commissions"
+              ? commissions()
+              : k === "collection_summary"
+                ? collectionSummary()
+                : k === "followups"
+                  ? followups()
+                  : k === "challenge_leaderboard"
+                    ? challengeLeaderboard()
+                    : list(k);
+      }
+
+      // ---------- لوحة التحكم ----------
+      async function dash() {
+        const M = $("main");
+        M.innerHTML = '<p class="m">جاري تحميل لوحة التحكم…</p>';
+        const [pr, pay, po, ex, pc, su] = await Promise.all([
+          db
+            .from("projects")
+            .select(
+              "id,execution_status,agreed_price,marketer_id,marketer_rate_applied,leader_rate_applied",
+            ),
+          db.from("client_payments").select("amount,project_id"),
+          db.from("payouts").select("amount,kind,recipient_id"),
+          db.from("business_expenses").select("amount"),
+          db.from("project_costs").select("amount"),
+          db
+            .from("service_subscriptions")
+            .select("id,status,next_due_date,amount"),
+        ]);
+        const failed = [pr, pay, po, ex, pc, su].find((x) => x.error);
+        if (failed)
+          return (M.innerHTML = `<h2>لوحة التحكم</h2><p class="err">${esc(failed.error.message)}<br>لو دي أول مرة تفتح النسخة الجديدة، شغّل ملف SQL المرفق في Supabase الأول.</p>`);
+        const p = pr.data || [],
+          payments = pay.data || [],
+          payouts = po.data || [],
+          expenses = ex.data || [],
+          projectCosts = pc.data || [],
+          subs = su.data || [];
+        const n = (a, f) => a.filter(f).length;
+        const agreed = p
+          .filter((x) => x.execution_status !== "cancelled")
+          .reduce((a, x) => a + Number(x.agreed_price || 0), 0);
+        const collected = payments.reduce(
+          (a, x) => a + Number(x.amount || 0),
+          0,
+        );
+        const paidOut = payouts.reduce((a, x) => a + Number(x.amount || 0), 0);
+        const spent = expenses.reduce((a, x) => a + Number(x.amount || 0), 0);
+        const costTotal = projectCosts.reduce(
+          (a, x) => a + Number(x.amount || 0),
+          0,
+        );
+        const balance = collected - spent - costTotal - paidOut;
+        const dueSubs = subs.filter(
+          (x) =>
+            x.status === "active" &&
+            x.next_due_date &&
+            x.next_due_date <= today,
+        );
+        const overdue = n(
+          L.clients,
+          (x) =>
+            x.next_followup_at &&
+            x.next_followup_at <= today &&
+            !["converted", "not_interested", "lost"].includes(x.stage),
+        );
+        const activeProjects = n(
+          p,
+          (x) =>
+            x.execution_status === "in_progress" ||
+            x.execution_status === "waiting_client_info" ||
+            x.execution_status === "waiting_client_review" ||
+            x.execution_status === "needs_revisions",
+        );
+        const S = [
+          [
+            "إجمالي التحصيل",
+            collected.toLocaleString("ar-EG") + " ج.م",
+            "المبالغ المسجلة من العملاء",
+          ],
+          [
+            "قيمة الاتفاقات",
+            agreed.toLocaleString("ar-EG") + " ج.م",
+            "المشاريع غير الملغاة",
+          ],
+          [
+            "صافي النقدية",
+            balance.toLocaleString("ar-EG") + " ج.م",
+            "بعد التكاليف والمدفوعات المسجلة",
+          ],
+          ["مشاريع نشطة", activeProjects, "قيد التنفيذ أو انتظار العميل"],
+        ];
+        M.innerHTML = `<div class="dash-head"><div><p class="eyebrow">نظرة عامة</p><h2>أهلاً بيك 👋</h2><p class="m">ملخص سريع لحالة شغلك، من غير زحمة تفاصيل.</p></div><span class="update-time">آخر تحديث · ${new Date().toLocaleString("ar-EG", { dateStyle: "medium", timeStyle: "short" })}</span></div>
+        <div class="grid dashboard-stats">${S.map(([l, v, sub]) => `<div class="stat"><span>${l}</span><b>${v}</b><small>${sub}</small></div>`).join("")}</div>
+        <section class="dashboard-section"><div class="section-heading"><div><h3>اختصارات سريعة</h3><p class="m">وصل لأكتر الحاجات اللي بتستخدمها من هنا.</p></div></div><div class="quick-actions"><button class="quick-action" data-goto="clients"><span class="quick-icon">＋</span><span><b>إضافة عميل</b><small>سجّل عميل جديد</small></span><span class="quick-arrow">←</span></button><button class="quick-action" data-goto="projects"><span class="quick-icon">↗</span><span><b>المشاريع</b><small>راجع المشاريع وحالتها</small></span><span class="quick-arrow">←</span></button><button class="quick-action" data-goto="client_payments"><span class="quick-icon">↙</span><span><b>تسجيل تحصيل</b><small>سجّل دفعة من عميل</small></span><span class="quick-arrow">←</span></button><button class="quick-action" data-goto="commissions"><span class="quick-icon">٪</span><span><b>العمولات</b><small>راجع المستحقات</small></span><span class="quick-arrow">←</span></button></div></section>
+        <section class="dashboard-section"><div class="section-heading"><div><h3>محتاج متابعة</h3><p class="m">الحاجات اللي تستاهل تبص عليها دلوقتي.</p></div></div><div class="attention-list"><button class="attention-item" data-goto="followups"><span class="attention-dot ${overdue ? "warning" : ""}"></span><span><b>متابعات العملاء المتأخرة</b><small>العملاء اللي فات موعد التواصل معاهم</small></span><strong>${overdue}</strong><span class="quick-arrow">←</span></button><button class="attention-item" data-goto="service_subscriptions"><span class="attention-dot ${dueSubs.length ? "warning" : ""}"></span><span><b>الاشتراكات المستحقة</b><small>موعد دفعها النهارده أو فات</small></span><strong>${dueSubs.length}</strong><span class="quick-arrow">←</span></button><button class="attention-item" data-goto="marketers"><span class="attention-dot"></span><span><b>المسوقون النشطون</b><small>إجمالي المسوقين بحالة نشطة</small></span><strong>${n(L.marketers, (x) => x.status === "active")}</strong><span class="quick-arrow">←</span></button></div></section>
+        <p class="dashboard-note">صافي النقدية = التحصيلات المسجلة − المصروفات العامة − تكاليف المشاريع − المدفوعات المسجلة. ده مؤشر نقدي، مش صافي ربح محاسبي كامل.</p>`;
+        M.onclick = (e) => {
+          const b = e.target.closest("[data-goto]");
+          if (!b) return;
+          const k = b.dataset.goto;
+          go(k);
+          if (k === "clients") setTimeout(() => $("#add")?.click(), 80);
+          if (k === "client_payments") setTimeout(() => $("#add")?.click(), 80);
+        };
+      }
+
+      async function collectionSummary() {
+        const M = $("main");
+        M.innerHTML =
+          '<h2>ملخص التحصيل والمتبقي</h2><p class="m">جاري حساب التحصيلات لكل مشروع…</p>';
+        const [pr, pa] = await Promise.all([
+          db
+            .from("projects")
+            .select(
+              "id,name,project_no,client_id,agreed_price,execution_status,agreed_date",
+            )
+            .order("agreed_date", { ascending: false }),
+          db.from("client_payments").select("project_id,amount"),
+        ]);
+        const bad = [pr, pa].find((x) => x.error);
+        if (bad)
+          return (M.innerHTML = `<h2>ملخص التحصيل والمتبقي</h2><p class="err">${esc(bad.error.message)}</p>`);
+        const payments = pa.data || [];
+        const rows = (pr.data || []).map((p) => {
+          const collected = payments
+            .filter((x) => x.project_id === p.id)
+            .reduce((a, x) => a + Number(x.amount || 0), 0);
+          const agreed = Number(p.agreed_price || 0);
+          return { ...p, collected, remaining: agreed - collected };
+        });
+        const totalAgreed = rows
+            .filter((x) => x.execution_status !== "cancelled")
+            .reduce((a, x) => a + Number(x.agreed_price || 0), 0),
+          totalCollected = rows.reduce((a, x) => a + x.collected, 0),
+          totalRemaining = rows
+            .filter((x) => x.execution_status !== "cancelled")
+            .reduce((a, x) => a + x.remaining, 0);
+        M.innerHTML = `<h2>ملخص التحصيل والمتبقي</h2><div class="grid"><div class="stat"><span>قيمة المشاريع غير الملغاة</span><b>${totalAgreed.toLocaleString("ar-EG")} ج.م</b></div><div class="stat"><span>إجمالي التحصيل المسجل</span><b>${totalCollected.toLocaleString("ar-EG")} ج.م</b></div><div class="stat"><span>المتبقي على المشاريع غير الملغاة</span><b>${totalRemaining.toLocaleString("ar-EG")} ج.م</b></div></div><p class="m">المتبقي محسوب من السعر المتفق عليه ناقص كل الدفعات المسجلة. لو في مشروع ملغي أو مبلغ مسترد، راجعه يدويًا لأن الاستردادات لم تُسجل كحركات مستقلة بعد.</p><div class="card tw"><table><thead><tr><th>رقم المشروع</th><th>اسم المشروع</th><th>العميل</th><th>الحالة</th><th>المتفق عليه</th><th>المحصّل</th><th>المتبقي</th><th></th></tr></thead><tbody>${rows.map((x) => `<tr><td>${esc(x.project_no ?? "—")}</td><td>${esc(x.name || "—")}</td><td>${esc(nm("clients", x.client_id))}</td><td>${esc(lab(PST, x.execution_status))}</td><td>${Number(x.agreed_price || 0).toLocaleString("ar-EG")}</td><td>${x.collected.toLocaleString("ar-EG")}</td><td>${x.remaining.toLocaleString("ar-EG")}</td><td><button class="btn s" data-pay-project="${x.id}">تسجيل دفعة</button></td></tr>`).join("") || '<tr><td colspan="8">لا توجد مشاريع بعد.</td></tr>'}</tbody></table></div>`;
+        M.onclick = (e) => {
+          const b = e.target.closest("button[data-pay-project]");
+          if (!b) return;
+          go("client_payments");
+          setTimeout(() => {
+            if ($("#add")) {
+              $("#add").click();
+              setTimeout(() => {
+                const sel = $("#f_project_id");
+                if (sel) sel.value = b.dataset.payProject;
+              }, 50);
+            }
+          }, 100);
+        };
+      }
+
+      async function commissions() {
+        const M = $("main");
+        M.innerHTML =
+          '<h2>العمولات والمستحقات</h2><p class="m">جاري الحساب…</p>';
+        const [pr, pa, po, ma] = await Promise.all([
+          db
+            .from("projects")
+            .select(
+              "id,name,execution_status,agreed_price,marketer_id,marketer_rate_applied,leader_rate_applied",
+            ),
+          db.from("client_payments").select("project_id,amount"),
+          db.from("payouts").select("recipient_id,kind,amount"),
+          db.from("marketers").select("id,name,account_type,leader_id,status"),
+        ]);
+        const bad = [pr, pa, po, ma].find((x) => x.error);
+        if (bad)
+          return (M.innerHTML = `<h2>العمولات والمستحقات</h2><p class="err">${esc(bad.error.message)}</p>`);
+        const projects = pr.data || [],
+          payments = pa.data || [],
+          payouts = po.data || [],
+          marketers = ma.data || [];
+        const earned = {};
+        const get = (id) =>
+          earned[id] ||
+          (earned[id] = {
+            name: marketers.find((m) => m.id === id)?.name || "غير محدد",
+            earned: 0,
+            paid: 0,
+          });
+        for (const p of projects) {
+          if (p.execution_status === "cancelled" || !p.marketer_id) continue;
+          const collected = payments
+            .filter((x) => x.project_id === p.id)
+            .reduce((s, x) => s + Number(x.amount || 0), 0);
+          const marketer = marketers.find((m) => m.id === p.marketer_id);
+          const mr = Number(p.marketer_rate_applied || 0);
+          if (mr > 0) get(p.marketer_id).earned += (collected * mr) / 100;
+          const lr = Number(p.leader_rate_applied || 0);
+          if (lr > 0 && marketer?.leader_id)
+            get(marketer.leader_id).earned += (collected * lr) / 100;
+        }
+        for (const x of payouts) {
+          if (x.kind === "commission")
+            get(x.recipient_id).paid += Number(x.amount || 0);
+        }
+        const rows = Object.entries(earned)
+          .map(([id, x]) => ({ id, ...x, remaining: x.earned - x.paid }))
+          .sort((a, b) => b.remaining - a.remaining);
+        const totalEarned = rows.reduce((s, x) => s + x.earned, 0),
+          totalPaid = rows.reduce((s, x) => s + x.paid, 0),
+          totalDue = rows.reduce((s, x) => s + x.remaining, 0);
+        M.innerHTML = `<h2>العمولات والمستحقات</h2><div class="grid"><div class="stat"><span>عمولات مستحقة حسب التحصيل</span><b>${totalEarned.toLocaleString("ar-EG", { maximumFractionDigits: 2 })} ج.م</b></div><div class="stat"><span>مدفوع كعمولات</span><b>${totalPaid.toLocaleString("ar-EG", { maximumFractionDigits: 2 })} ج.م</b></div><div class="stat"><span>المتبقي التقريبي</span><b>${totalDue.toLocaleString("ar-EG", { maximumFractionDigits: 2 })} ج.م</b></div></div><p class="m">الحساب يعتمد على المبالغ المسجلة في client_payments ونسب المشروع المحفوظة، ويخصم فقط المدفوعات التي نوعها commission. راجع نوع المدفوعات القديمة قبل الاعتماد النهائي.</p><div class="card tw"><table><thead><tr><th>المسوق/الليدر</th><th>العمولة المكتسبة</th><th>العمولة المدفوعة</th><th>المتبقي</th></tr></thead><tbody>${rows.map((x) => `<tr><td>${esc(x.name)}</td><td>${x.earned.toLocaleString("ar-EG", { maximumFractionDigits: 2 })}</td><td>${x.paid.toLocaleString("ar-EG", { maximumFractionDigits: 2 })}</td><td>${x.remaining.toLocaleString("ar-EG", { maximumFractionDigits: 2 })}</td></tr>`).join("") || '<tr><td colspan="4">لا توجد عمولات محسوبة بعد. تأكد من وجود تحصيلات ونسب محفوظة في المشاريع.</td></tr>'}</tbody></table></div>`;
+      }
+
+      async function followups() {
+        const M = $("main");
+        const rows = (L.clients || [])
+          .filter((x) => x.next_followup_at)
+          .sort((a, b) => a.next_followup_at.localeCompare(b.next_followup_at));
+        const overdue = rows.filter(
+          (x) =>
+            x.next_followup_at < today &&
+            !["converted", "not_interested", "lost"].includes(x.stage),
+        );
+        const todayRows = rows.filter((x) => x.next_followup_at === today);
+        const upcoming = rows.filter((x) => x.next_followup_at > today);
+        const render = (title, arr) =>
+          `<div class="card" style="margin:12px 0"><h3>${title} (${arr.length})</h3>${arr.length ? `<div class="tw"><table><thead><tr><th>العميل</th><th>الهاتف</th><th>المرحلة</th><th>موعد المتابعة</th><th>الملاحظات</th><th></th></tr></thead><tbody>${arr.map((x) => `<tr><td>${esc(x.name)}</td><td>${esc(x.phone || "—")}</td><td>${esc(lab(STG, x.stage))}</td><td>${esc(x.next_followup_at)}</td><td>${esc(x.notes || "—")}</td><td><button class="btn s" data-client="${x.id}">فتح العميل</button></td></tr>`).join("")}</tbody></table></div>` : '<p class="m">مفيش سجلات في القسم ده.</p>'}</div>`;
+        M.innerHTML = `<h2>المتابعات والتذكيرات</h2><p class="m">القائمة مبنية على موعد المتابعة القادم المسجل لكل عميل.</p>${render("متابعات متأخرة", overdue)}${render("متابعات اليوم", todayRows)}${render("متابعات قادمة", upcoming)}`;
+        M.onclick = (e) => {
+          const b = e.target.closest("button[data-client]");
+          if (!b) return;
+          go("clients");
+          setTimeout(() => {
+            const q = $("#q");
+            if (q) {
+              q.value =
+                L.clients.find((x) => x.id === b.dataset.client)?.name || "";
+              q.dispatchEvent(new Event("input"));
+            }
+          }, 150);
+        };
+      }
+
+      async function challengeLeaderboard() {
+        const M = $("main");
+        M.innerHTML =
+          '<h2>ترتيب التحديات</h2><p class="m">جاري تحميل النتائج…</p>';
+        const [ch, pr, pa, ma] = await Promise.all([
+          db
+            .from("sales_challenges")
+            .select("*")
+            .order("start_date", { ascending: false }),
+          db
+            .from("projects")
+            .select(
+              "id,name,agreed_date,agreed_price,execution_status,marketer_id",
+            ),
+          db.from("client_payments").select("project_id,amount,paid_at"),
+          db.from("marketers").select("id,name,account_type,status"),
+        ]);
+        const bad = [ch, pr, pa, ma].find((x) => x.error);
+        if (bad)
+          return (M.innerHTML = `<h2>ترتيب التحديات</h2><p class="err">${esc(bad.error.message)}</p>`);
+        const challenges = ch.data || [],
+          projects = pr.data || [],
+          payments = pa.data || [],
+          marketers = ma.data || [];
+        if (!challenges.length)
+          return (M.innerHTML =
+            '<h2>ترتيب التحديات</h2><p class="m">أضف تحديًا أولًا من صفحة «التحديات».</p>');
+        M.innerHTML = `<h2>ترتيب التحديات</h2><div class="card"><label>اختار التحدي</label><select id="challenge-pick">${challenges.map((c) => `<option value="${c.id}">${esc(c.name)} — ${esc(c.start_date)} إلى ${esc(c.end_date)}</option>`).join("")}</select><div id="challenge-results" style="margin-top:16px"></div></div>`;
+        const draw = () => {
+          const c = challenges.find((x) => x.id === $("#challenge-pick").value);
+          if (!c) return;
+          const eligible = marketers.filter(
+            (m) =>
+              c.eligible_account_type === "all" ||
+              m.account_type === c.eligible_account_type,
+          );
+          const scores = eligible
+            .map((m) => {
+              const mp = projects.filter(
+                (p) =>
+                  p.marketer_id === m.id &&
+                  p.agreed_date >= c.start_date &&
+                  p.agreed_date <= c.end_date &&
+                  p.execution_status !== "cancelled",
+              );
+              let score = 0;
+              if (c.metric === "projects_count") score = mp.length;
+              else if (c.metric === "agreed_value")
+                score = mp.reduce((a, p) => a + Number(p.agreed_price || 0), 0);
+              else {
+                const ids = new Set(mp.map((p) => p.id));
+                score = payments
+                  .filter(
+                    (x) =>
+                      ids.has(x.project_id) &&
+                      x.paid_at >= c.start_date &&
+                      x.paid_at <= c.end_date,
+                  )
+                  .reduce((a, x) => a + Number(x.amount || 0), 0);
+              }
+              return { m, score, count: mp.length };
+            })
+            .sort((a, b) => b.score - a.score);
+          const metricLabel =
+            {
+              projects_count: "عدد المشاريع",
+              agreed_value: "قيمة الاتفاقات",
+              collected_value: "التحصيل داخل فترة التحدي",
+            }[c.metric] || c.metric;
+          $("#challenge-results").innerHTML =
+            `<p><b>${esc(c.name)}</b> — ${metricLabel}</p><p class="m">يتم احتساب المشاريع بتاريخ اتفاق داخل فترة التحدي، مع استبعاد المشاريع الملغاة. مراجعة الفائز واعتماده يدويًا من صفحة «جوائز التحديات».</p><div class="tw"><table><thead><tr><th>الترتيب</th><th>المسوق</th><th>نوع الحساب</th><th>المشاريع المؤهلة</th><th>النتيجة</th></tr></thead><tbody>${scores.map((x, i) => `<tr><td>${i + 1}</td><td>${esc(x.m.name)}</td><td>${esc(lab(ACC, x.m.account_type))}</td><td>${x.count}</td><td>${x.score.toLocaleString("ar-EG", { maximumFractionDigits: 2 })}${c.metric !== "projects_count" ? " ج.م" : ""}</td></tr>`).join("") || '<tr><td colspan="5">لا توجد نتائج حتى الآن.</td></tr>'}</tbody></table></div>`;
+        };
+        $("#challenge-pick").onchange = draw;
+        draw();
+      }
+
+      // ---------- القوائم العامة ----------
+      async function list(key) {
+        const c = R[key],
+          M = $("main");
+        M.innerHTML = `<h2>${c.t}</h2><p class="m">جاري التحميل…</p>`;
+        const { data, error } = await db
+          .from(c.tb)
+          .select("*")
+          .order(c.ord, { ascending: !!c.asc })
+          .limit(c.lim || 1000);
+        if (error)
+          return (M.innerHTML = `<h2>${c.t}</h2><p class="err">${esc(error.message)}</p>`);
+        ROWS = data;
+        M.innerHTML = `<div class="bar" style="justify-content:space-between"><h2>${c.t}</h2>${c.ro ? "" : '<button class="btn" id="add">+ إضافة</button>'}</div>
+  <div class="bar"><input id="q" placeholder="بحث…" aria-label="بحث">${c.filt ? `<select id="fl" aria-label="تصفية"><option value="">كل الحالات</option>${c.filt[1].map(([a, b]) => `<option value="${a}">${b}</option>`).join("")}</select>` : ""}</div><div class="card" id="tbl"></div>`;
+        $("#q").oninput = () => tbl(key);
+        if ($("#fl")) $("#fl").onchange = () => tbl(key);
+        if ($("#add")) $("#add").onclick = () => openForm(key);
+        $("#tbl").onclick = (e) => {
+          const b = e.target.closest("button");
+          if (!b) return;
+          if (b.dataset.e)
+            openForm(
+              key,
+              ROWS.find((r) => r.id === b.dataset.e),
+            );
+          if (b.dataset.a) rates(b.dataset.a);
+        };
+        tbl(key);
+      }
+      function tbl(key) {
+        const c = R[key],
+          q = $("#q").value.trim().toLowerCase(),
+          fv = $("#fl")?.value;
+        const show = (fm, v) => String(fm ? fm(v) : (v ?? ""));
+        const rows = ROWS.filter(
+          (r) =>
+            (!fv || r[c.filt[0]] === fv) &&
+            (!q ||
+              c.cols.some(([k, , fm]) =>
+                show(fm, r[k]).toLowerCase().includes(q),
+              )),
+        );
+        $("#tbl").innerHTML = rows.length
+          ? `<div class="tw"><table><tr>${c.cols.map((x) => `<th>${x[1]}</th>`).join("")}${c.ro ? "" : "<th></th>"}</tr>${rows.map((r) => `<tr>${c.cols.map(([k, , fm]) => `<td>${esc(show(fm, r[k]))}</td>`).join("")}${c.ro ? "" : `<td><button class="btn s" data-e="${r.id}">تعديل</button>${c.act ? ` <button class="btn s" data-a="${r.id}">النسب</button>` : ""}</td>`}</tr>`).join("")}</table></div>`
+          : '<p class="m">لا توجد بيانات مطابقة. اضغط «إضافة» لإنشاء أول سجل.</p>';
+      }
+
+      // ---------- النماذج ----------
+      function inp(f, v) {
+        const id = "f_" + f.k,
+          val = v ?? f.def ?? "";
+        if (f.ty === "select")
+          return `<select id="${id}"><option value="">—</option>${f
+            .o()
+            .map(
+              ([a, b]) =>
+                `<option value="${esc(a)}"${a === val ? " selected" : ""}>${esc(b)}</option>`,
+            )
+            .join("")}</select>`;
+        if (f.ty === "bool")
+          return `<select id="${id}"><option value="true"${val !== false ? " selected" : ""}>نعم</option><option value="false"${val === false ? " selected" : ""}>لا</option></select>`;
+        if (f.ty === "textarea" || f.ty === "lines")
+          return `<textarea id="${id}" rows="3">${esc(val)}</textarea>`;
+        return `<input id="${id}" type="${f.ty || "text"}" value="${esc(val)}"${f.ty === "number" ? ' step="any"' : ""}>`;
+      }
+      function read(c) {
+        const o = {},
+          miss = [];
+        for (const f of c.f) {
+          let v = $("#f_" + f.k).value;
+          if (f.ty === "bool") v = v === "true";
+          else if (f.ty === "lines")
+            v = v
+              .split("\n")
+              .map((s) => s.trim())
+              .filter(Boolean)
+              .map((s) => ({ key: s, label: s, type: "text" }));
+          else if (v.trim() === "") {
+            v = null;
+            if (f.req) miss.push(f.l);
+          } else if (f.ty === "number") v = Number(v);
+          o[f.k] = v;
+        }
+        if (miss.length) {
+          toast("حقول مطلوبة: " + miss.join("، "));
+          return null;
+        }
+        return o;
+      }
+      const gcf = () => {
+        const o = { ...CD };
+        document
+          .querySelectorAll("#cf input")
+          .forEach((i) => (o[i.dataset.k] = i.value));
+        return o;
+      };
+      function drawCF() {
+        const s = L.service_types.find(
+          (x) => x.id === $("#f_service_type_id").value,
+        );
+        $("#cf").innerHTML = (s?.custom_fields || [])
+          .map(
+            (f) =>
+              `<label>${esc(f.label)}</label><input data-k="${esc(f.key)}" value="${esc(CD[f.key] ?? "")}">`,
+          )
+          .join("");
+      }
+      function openForm(key, row) {
+        const c = R[key];
+        CD = row?.custom_details || {};
+        const renderField = (f) => {
+          let v = row ? row[f.k] : undefined;
+          if (f.ty === "lines") v = (v || []).map((x) => x.label).join("\n");
+          if (f.ty === "datetime-local" && v)
+            v = new Date(v)
+              .toLocaleString("sv-SE")
+              .replace(" ", "T")
+              .slice(0, 16);
+          return `<div class="form-field"><label>${f.l}${f.req ? " *" : ""}</label>${inp(f, v)}</div>`;
+        };
+        const requiredFields = c.f.filter((f) => f.req);
+        const optionalFields = c.f.filter((f) => !f.req);
+        const visibleOptional = [];
+        const extraOptional = optionalFields;
+        $("#dlg").innerHTML =
+          `<div class="form-title"><p class="eyebrow">${row ? "تعديل بيانات" : "سجل جديد"}</p><h2>${row ? "تعديل" : "إضافة"} — ${c.t}</h2><p class="m">املأ البيانات الأساسية، والتفاصيل الإضافية اختيارية.</p></div><div class="form-fields">${requiredFields.map(renderField).join("")}${visibleOptional.map(renderField).join("")}</div>${extraOptional.length ? `<details class="extra-fields"><summary>+ تفاصيل إضافية <span>${extraOptional.length} حقول اختيارية — افتحها عند الحاجة</span></summary><div class="form-fields extra-grid">${extraOptional.map(renderField).join("")}</div></details>` : ""}${key === "projects" ? '<div id="cf"></div>' : ""}<div class="bar form-actions"><button class="btn" id="sv">حفظ</button><button class="btn s" id="cx">إلغاء</button></div>`;
+        $("#cx").onclick = () => $("#dlg").close();
+        $("#sv").onclick = () => save(key, row);
+        if (key === "projects") {
+          drawCF();
+          $("#f_service_type_id").onchange = () => {
+            CD = gcf();
+            drawCF();
+          };
+        }
+        $("#dlg").showModal();
+      }
+      async function save(key, row) {
+        const c = R[key],
+          o = read(c);
+        if (!o) return;
+        if (
+          [
+            "client_payments",
+            "payouts",
+            "business_expenses",
+            "project_costs",
+            "service_subscriptions",
+            "individual_rewards",
+            "challenge_awards",
+          ].includes(key) &&
+          Number(o.amount ?? -1) < 0
+        )
+          return toast("القيمة لازم تكون صفر أو أكبر.");
+        if (key === "sales_challenges" && Number(o.prize_amount ?? -1) < 0)
+          return toast("قيمة الجائزة لازم تكون صفر أو أكبر.");
+        if (key === "sales_challenges" && o.start_date > o.end_date)
+          return toast("تاريخ بداية التحدي لازم يكون قبل نهايته.");
+        if (key === "individual_rewards" && o.start_date > o.end_date)
+          return toast("بداية فترة المكافأة لازم تكون قبل نهايتها.");
+        if (
+          key === "service_subscriptions" &&
+          o.end_date &&
+          o.start_date > o.end_date
+        )
+          return toast("تاريخ نهاية الاشتراك لازم يكون بعد البداية.");
+        if (key === "projects") o.custom_details = gcf();
+        if (key === "marketers" && o.account_type !== "team_member")
+          o.leader_id = null;
+        if (
+          key === "marketers" &&
+          o.account_type === "team_member" &&
+          !o.leader_id
+        )
+          return toast("المسوق التابع يحتاج ليدرًا مسؤولًا.");
+        // تغيير المصدر / المسوق على سجل موجود يمر عبر دالة بسبب إلزامي
+        const g =
+          row &&
+          {
+            clients: ["referred_by", "change_client_source", "p_client"],
+            projects: ["marketer_id", "change_project_marketer", "p_project"],
+          }[key];
+        let rpc = null;
+        if (g && (o[g[0]] ?? null) !== (row[g[0]] ?? null)) {
+          const why = prompt("سبب تغيير المسوق (إلزامي):");
+          if (!why || !why.trim()) return toast("السبب إلزامي لتغيير المسوق.");
+          rpc = [g[1], { [g[2]]: row.id, p_marketer: o[g[0]], p_reason: why }];
+          delete o[g[0]];
+        }
+        if (key === "clients" && !row && o.phone) {
+          const { data } = await db.rpc("find_possible_duplicate_clients", {
+            p_phone: o.phone,
+            p_name: o.name,
+          });
+          if (
+            data?.length &&
+            !confirm(
+              "يوجد عميل محتمل التكرار: " +
+                data.map((d) => d.name).join("، ") +
+                "\nهل تريد الحفظ على أي حال؟",
+            )
+          )
+            return;
+        }
+        let r = row
+          ? await db.from(c.tb).update(o).eq("id", row.id)
+          : await db.from(c.tb).insert(o);
+        if (!r.error && rpc) r = await db.rpc(rpc[0], rpc[1]);
+        if (r.error) return toast(r.error.message);
+        $("#dlg").close();
+        toast("تم الحفظ", 1);
+        await loadL();
+        list(key);
+      }
+      async function rates(id) {
+        const r = ROWS.find((x) => x.id === id);
+        const a = prompt(
+          "نسبة عمولة المسوق % لهذا المشروع (فارغ = النسبة الافتراضية):",
+          r.override_marketer_rate ?? "",
+        );
+        if (a === null) return;
+        const b = prompt(
+          "نسبة عمولة الليدر % (فارغ = الافتراضية):",
+          r.override_leader_rate ?? "",
+        );
+        if (b === null) return;
+        const ex = confirm(
+          "هل تريد إعفاء المشروع من العمولة بالكامل؟\nموافق = إعفاء، إلغاء = لا",
+        );
+        const why = prompt("سبب التعديل (إلزامي):");
+        if (!why || !why.trim()) return toast("السبب إلزامي.");
+        const { error } = await db.rpc("update_project_rates", {
+          p_project: id,
+          p_marketer_rate: a === "" ? null : Number(a),
+          p_leader_rate: b === "" ? null : Number(b),
+          p_exempt: ex,
+          p_reason: why,
+        });
+        error
+          ? toast(error.message)
+          : (toast("تم تعديل النسب", 1), list("projects"));
+      }
+
+      // ---------- إعدادات العمولات فقط ----------
+      async function settings() {
+        const M = $("main");
+        const commissionSettings = [
+          {
+            key: "commission_independent",
+            label: "عمولة المسوق المستقل",
+            help: "النسبة الافتراضية للمسوق المستقل.",
+          },
+          {
+            key: "commission_team_member",
+            label: "عمولة عضو الفريق",
+            help: "النسبة الافتراضية للمسوق التابع لليدر.",
+          },
+          {
+            key: "commission_leader_override",
+            label: "عمولة الليدر على مشاريع أعضاء فريقه",
+            help: "النسبة التي يحصل عليها الليدر عن مشروع جلبه أحد أعضاء فريقه.",
+          },
+          {
+            key: "commission_leader_personal",
+            label: "عمولة الليدر على مشاريعه الشخصية",
+            help: "النسبة الافتراضية عندما يجلب الليدر المشروع بنفسه.",
+          },
+        ];
+        M.innerHTML =
+          '<h2>تعديل العمولات</h2><p class="m">عدّل نسب العمولات الافتراضية فقط. التغييرات تسري على المشاريع الجديدة، أما المشاريع القديمة فتحتفظ بالنسب المسجلة وقت إنشائها.</p><p class="m">جاري تحميل النسب…</p>';
+        const { data, error } = await db
+          .from("settings")
+          .select("key,value")
+          .in(
+            "key",
+            commissionSettings.map((x) => x.key),
+          );
+        if (error)
+          return (M.innerHTML = `<h2>تعديل العمولات</h2><p class="err">${esc(error.message)}</p>`);
+
+        const values = new Map((data || []).map((x) => [x.key, x.value]));
+        const missing = commissionSettings.filter((x) => !values.has(x.key));
+        M.innerHTML = `<h2>تعديل العمولات</h2>
+          <p class="m">عدّل نسب العمولات الافتراضية فقط. التغييرات تسري على المشاريع الجديدة، أما المشاريع القديمة فتحتفظ بالنسب المسجلة وقت إنشائها.</p>
+          ${missing.length ? `<p class="err">بعض إعدادات العمولات غير موجودة في جدول settings: ${missing.map((x) => esc(x.key)).join("، ")}</p>` : ""}
+          <div class="grid">${commissionSettings
+            .filter((x) => values.has(x.key))
+            .map((item) => {
+              const raw = values.get(item.key);
+              const value = typeof raw === "number" ? raw : Number(raw);
+              return `<div class="card">
+              <label for="commission_${item.key}"><b>${esc(item.label)}</b></label>
+              <p class="m">${esc(item.help)}</p>
+              <div style="display:flex;align-items:center;gap:8px;margin-top:12px">
+                <input id="commission_${item.key}" type="number" min="0" max="100" step="0.01" value="${Number.isFinite(value) ? value : 0}" style="width:100%;min-width:0" dir="ltr" />
+                <b>%</b>
+              </div>
+              <button class="btn s" data-commission-save="${item.key}" style="margin-top:12px">حفظ النسبة</button>
+            </div>`;
+            })
+            .join("")}</div>`;
+
+        M.onclick = async (e) => {
+          const key = e.target.dataset?.commissionSave;
+          if (!key) return;
+          const input = $("commission_" + key);
+          const value = Number(input?.value);
+          if (
+            !input ||
+            input.value.trim() === "" ||
+            !Number.isFinite(value) ||
+            value < 0 ||
+            value > 100
+          ) {
+            return toast("اكتب نسبة صحيحة من 0 إلى 100.");
+          }
+          const button = e.target;
+          button.disabled = true;
+          const { error: saveError } = await db
+            .from("settings")
+            .update({ value })
+            .eq("key", key);
+          button.disabled = false;
+          if (saveError) return toast(saveError.message);
+          values.set(key, value);
+          toast("تم حفظ نسبة العمولة", 1);
+        };
+      }
+      boot();
+    </script>
+  </body>
+</html>
