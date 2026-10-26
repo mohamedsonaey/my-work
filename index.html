@@ -417,17 +417,17 @@
         display: flex;
         align-items: center;
         gap: 10px;
-        color: #fff;
+        color: #103f40;
         font-size: 17px;
         font-weight: 800;
         margin: 2px 8px 26px;
         letter-spacing: -0.3px;
       }
       nav h1::before {
-        content: "ب";
+        content: "ElSonaey";
         display: inline-grid;
         place-items: center;
-        width: 38px;
+        width: auto;
         height: 38px;
         flex: 0 0 38px;
         border-radius: 13px;
@@ -435,6 +435,7 @@
         color: #103f40;
         font-size: 21px;
         font-weight: 900;
+        padding: 0px 10px;
       }
       nav a {
         display: flex;
@@ -2142,7 +2143,7 @@
         }
         await loadL();
         $("#app").innerHTML =
-          `<nav><h1>مساحة العمل</h1><span class="nav-subtitle">إدارة أعمالك من مكان واحد</span>${NAV_GROUPS.map((group, i) => (i === 0 ? `<div class="nav-caption">${group.title}</div>${group.items.map(([k, l]) => `<a data-k="${k}" tabindex="0">${l}</a>`).join("")}` : `<details class="nav-group"><summary>${group.title}</summary><div class="nav-children">${group.items.map(([k, l]) => `<a data-k="${k}" tabindex="0">${l}</a>`).join("")}</div></details>`)).join("")}<a id="out" tabindex="0">تسجيل الخروج</a></nav><main></main><dialog id="dlg"></dialog>`;
+          `<nav><h1></h1><span class="nav-subtitle">إدارة أعمالك من مكان واحد</span>${NAV_GROUPS.map((group, i) => (i === 0 ? `<div class="nav-caption">${group.title}</div>${group.items.map(([k, l]) => `<a data-k="${k}" tabindex="0">${l}</a>`).join("")}` : `<details class="nav-group"><summary>${group.title}</summary><div class="nav-children">${group.items.map(([k, l]) => `<a data-k="${k}" tabindex="0">${l}</a>`).join("")}</div></details>`)).join("")}<a id="out" tabindex="0">تسجيل الخروج</a></nav><main></main><dialog id="dlg"></dialog>`;
         document
           .querySelectorAll("nav a[data-k]")
           .forEach((a) => (a.onclick = () => go(a.dataset.k)));
